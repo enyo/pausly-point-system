@@ -37,6 +37,9 @@
 		numbers.target /
 			((numbers.first * 6 + numbers.second * 4 + numbers.third - numbers.miss * 1) / 7)
 	);
+	let timeWithMinimum = $derived(
+		numbers.target / ((numbers.first * minNumberOfSessionsPerWeek) / 7)
+	);
 
 	const formatDays = (days: number) => {
 		return formatDuration(intervalToDuration({ start: 0, end: days * 24 * 60 * 60 * 1000 }), {
@@ -73,10 +76,23 @@
 	)}>Option 2</button
 >
 
+<button
+	onclick={() => (
+		(numbers.first = 40),
+		(numbers.second = 20),
+		(numbers.third = 10),
+		(numbers.miss = 15),
+		(numbers.target = 1000)
+	)}>Option 3</button
+>
+
 <hr />
 <dl>
 	<dt>Min sessions / week to gain points:</dt>
 	<dd>{minNumberOfSessionsPerWeek}</dd>
+
+	<dt>Reach {numbers.target} with {minNumberOfSessionsPerWeek} sessions / week:</dt>
+	<dd>{formatDays(timeWithMinimum)}</dd>
 
 	<dt>Reach {numbers.target} points with 3 sessions / day:</dt>
 	<dd>{formatDays(fastest)}</dd>
