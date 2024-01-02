@@ -24,7 +24,7 @@
 	type Character = (typeof CHARACTERS)[number]
 
 	const CHARACTER_PROBABILITIES: { [key in Character]: WeekProbabilities } = {
-		visitor: [[10], [10], [10], [10], [10], [0], [0]],
+		visitor: [[40], [15], [20], [15], [20], [0], [0]],
 		rare: [[0], [90, 50, 5], [0], [90, 40, 5], [0], [0], [0]],
 		casual: [[80, 40], [30, 20], [20], [50, 30], [40, 20], [5], [5]],
 		common: [[80, 40, 10], [80, 40, 10], [80, 40, 10], [80, 40, 10], [80, 40, 10], [20], [20]],
@@ -200,15 +200,15 @@
 <div class="values">
 	<label>
 		<input type="number" bind:value={points.first} />
-		<small>Points for 1. session</small>
+		<small>Points for 1st session</small>
 	</label>
 	<label>
 		<input type="number" bind:value={points.second} />
-		<small>Points for 2. session</small>
+		<small>Points for 2nd session</small>
 	</label>
 	<label>
 		<input type="number" bind:value={points.third} />
-		<small>Points for 3. session</small>
+		<small>Points for 3rd session</small>
 	</label>
 	<label>
 		<input type="number" bind:value={points.target} />
