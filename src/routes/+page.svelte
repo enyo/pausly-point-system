@@ -174,7 +174,7 @@
 
 		const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-		let text = `${character}\n\n${CHARACTER_DESCRIPTIONS[character]}\n\n`
+		let text = `${character.toUpperCase()}\n\n${CHARACTER_DESCRIPTIONS[character]}\n\n`
 		const f = (v: number | string) => v.toString().padEnd(5, ' ')
 
 		for (let i = 0; i < 7; i++) {
@@ -245,7 +245,7 @@
 				onmouseover={() => (debug = getDescription(name as Character))}
 				onmouseout={() => (debug = '')}
 			>
-				<td title={getDescription(name as Character)}>{name}</td>
+				<td title={getDescription(name as Character)}>{name.toUpperCase()}</td>
 				<td title="Level after one year">{Math.floor(values.points / 1000)}</td>
 				<td title="Time to reach level 1">{formatDays(values.daysUntilFirstLevel)}</td>
 				<td title="Time to reach level 2">{formatDays(values.daysUntilSecondLevel)}</td>
