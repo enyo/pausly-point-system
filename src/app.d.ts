@@ -9,8 +9,10 @@ declare global {
 			first: number
 			second: number
 			third: number
-			miss: number
 			target: number
+			multiplierIncrease: number
+			multiplierDecay: number
+			multiplierCap: number
 		}
 		// interface Platform {}
 	}
