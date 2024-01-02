@@ -20,10 +20,11 @@
 		DayProbabilities,
 	]
 
-	const CHARACTERS = ['rare', 'casual', 'common', 'power', 'max'] as const
+	const CHARACTERS = ['visitor', 'rare', 'casual', 'common', 'power', 'max'] as const
 	type Character = (typeof CHARACTERS)[number]
 
 	const CHARACTER_PROBABILITIES: { [key in Character]: WeekProbabilities } = {
+		visitor: [[10], [10], [10], [10], [10], [0], [0]],
 		rare: [[0], [90, 50, 5], [0], [90, 40, 5], [0], [0], [0]],
 		casual: [[80, 40], [30, 20], [20], [50, 30], [40, 20], [5], [5]],
 		common: [[80, 40, 10], [80, 40, 10], [80, 40, 10], [80, 40, 10], [80, 40, 10], [20], [20]],
@@ -47,6 +48,7 @@
 		],
 	}
 	const CHARACTER_DESCRIPTIONS: { [key in Character]: string } = {
+		visitor: 'Does a session from time to time, but not regularly.',
 		rare: 'Typically does a session on Tuesday and Thursday, but not always.',
 		casual: 'Very likely to start with a session on Monday, and sometimes during the week.',
 		common:
@@ -96,6 +98,7 @@
 
 	type CalculatedProbabilities = {
 		points: number
+		totalSessions: number
 		daysUntilMaxMultiplier?: number | undefined
 		daysUntilFirstLevel?: number | undefined
 		daysUntilSecondLevel?: number | undefined
@@ -109,6 +112,7 @@
 
 	const INITIAL_CALCULATED_PROBABILITIES: CalculatedProbabilities = Object.freeze({
 		points: 0,
+		totalSessions: 0,
 		maxMultiplier: 1,
 	})
 
@@ -131,10 +135,13 @@
 				if (Math.random() * 100 <= probabilities[weekday][0]) {
 					sessionYesterday = true
 					thisCalculated.points += Math.ceil(points.first * multiplier)
+					thisCalculated.totalSessions++
 					if (Math.random() * 100 <= (probabilities[weekday][1] ?? 0)) {
 						thisCalculated.points += Math.ceil(points.second * multiplier)
+						thisCalculated.totalSessions++
 						if (Math.random() * 100 <= (probabilities[weekday][2] ?? 0)) {
 							thisCalculated.points += Math.ceil(points.third * multiplier)
+							thisCalculated.totalSessions++
 						}
 					}
 				} else {
@@ -175,6 +182,8 @@
 		const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 		let text = `${character.toUpperCase()}\n\n${CHARACTER_DESCRIPTIONS[character]}\n\n`
+
+		text += 'These are the chances this user does a 1st, 2nd or 3rd session on each weekday:\n\n'
 		const f = (v: number | string) => v.toString().padEnd(5, ' ')
 
 		for (let i = 0; i < 7; i++) {
@@ -190,25 +199,32 @@
 
 <div class="values">
 	<label>
-		<span>First</span> <input type="number" bind:value={points.first} />
+		<input type="number" bind:value={points.first} />
+		<small>Points for 1. session</small>
 	</label>
 	<label>
-		<span>Second</span> <input type="number" bind:value={points.second} />
+		<input type="number" bind:value={points.second} />
+		<small>Points for 2. session</small>
 	</label>
 	<label>
-		<span>Third</span> <input type="number" bind:value={points.third} />
+		<input type="number" bind:value={points.third} />
+		<small>Points for 3. session</small>
 	</label>
 	<label>
-		<span>Target</span> <input type="number" bind:value={points.target} />
+		<input type="number" bind:value={points.target} />
+		<small>Required points to level up</small>
 	</label>
 	<label>
-		<span>Multi increase</span> <input type="number" bind:value={points.multiplierIncrease} />
+		<input type="number" bind:value={points.multiplierIncrease} />
+		<small>Increment of multiplier after an active day</small>
 	</label>
 	<label>
-		<span>Multi decay</span> <input type="number" bind:value={points.multiplierDecay} />
+		<input type="number" bind:value={points.multiplierDecay} />
+		<small>Decay of multiplier after an <strong>inactive</strong> day</small>
 	</label>
 	<label>
-		<span>Multi cap</span> <input type="number" bind:value={points.multiplierCap} />
+		<input type="number" bind:value={points.multiplierCap} />
+		<small>Maximum multiplier</small>
 	</label>
 </div>
 
@@ -226,7 +242,7 @@
 
 <hr />
 
-<table border="1">
+<table cellspacing="0">
 	<thead>
 		<tr>
 			<th>Type</th>
@@ -235,6 +251,7 @@
 			<th title="Time to reach level 2">Level 2</th>
 			<th title="Time to reach level 3">Level 3</th>
 			<th title="Time to reach max multiplier">x{points.multiplierCap} Multiplier</th>
+			<th title="The total amount of sessions after 1 year">Session in 1y</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -243,6 +260,7 @@
 				onfocus={() => {}}
 				onblur={() => {}}
 				onmouseover={() => (debug = getDescription(name as Character))}
+				onclick={() => (debug = getDescription(name as Character))}
 				onmouseout={() => (debug = '')}
 			>
 				<td title={getDescription(name as Character)}>{name.toUpperCase()}</td>
@@ -251,6 +269,7 @@
 				<td title="Time to reach level 2">{formatDays(values.daysUntilSecondLevel)}</td>
 				<td title="Time to reach level 3">{formatDays(values.daysUntilThirdLevel)}</td>
 				<td title="Time to reach max multiplier">{formatDays(values.daysUntilMaxMultiplier)}</td>
+				<td title="The total amount of sessions after 1 year">{values.totalSessions}</td>
 			</tr>
 		{/each}
 	</tbody>
@@ -268,29 +287,33 @@
 	label {
 		display: flex;
 		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 0.5rem;
 	}
 	label span {
 		white-space: nowrap;
 	}
 	input {
-		width: 3rem;
+		width: 4rem;
+		font-size: 1.2rem;
+		padding: 0.2rem 0.4rem;
 	}
+	hr {
+		margin-block: 2rem;
+	}
+
 	table {
 		width: 100%;
+		font-size: 0.875rem;
 	}
-	dl {
-		display: grid;
-		grid-template-columns: auto 1fr;
-		gap: 0.5rem;
+	th {
+		font-size: 1rem;
 	}
-	dt,
-	dd {
-		margin: 0;
-	}
-	dt {
-		text-align: right;
-	}
-	dd {
-		white-space: nowrap;
+	th,
+	td {
+		outline: 1px solid #fff4;
+		padding: 0.3rem 0.5rem;
+		text-align: left;
 	}
 </style>
